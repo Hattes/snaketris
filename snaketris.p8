@@ -552,7 +552,7 @@ end
 
 c_del_countdown=20
 c_lines_per_level=1--todochange
-c_down_speed_mult=2
+c_down_speed_mult=3
 c_level_speed_inc=0.1
 c_no_scores_stored=15
 c_score_base=40
