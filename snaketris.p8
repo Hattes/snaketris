@@ -558,6 +558,7 @@ c_no_scores_stored=15
 c_score_base=40
 c_score_inc=10
 c_lines_per_lvl=7
+c_start_lvl=1
 
 
 --game state enums
