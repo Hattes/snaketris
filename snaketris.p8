@@ -22,7 +22,7 @@ function _init()
  speed=0.05
  score=0
  lines=0
- level=1
+ level=c_start_lvl
  countdown=-1
  snake_color=0
  dead_snakes={}--c_test_snake,
@@ -711,10 +711,11 @@ function draw_game()
 end
 
 function draw_map()
+ index=level%#c_lvl_clrs
  pal(c_lvl_clrs[1][1],
-     c_lvl_clrs[level][1])
+     c_lvl_clrs[index][1])
  pal(c_lvl_clrs[1][2],
-     c_lvl_clrs[level][2])
+     c_lvl_clrs[index][2])
  map(0,c_copy_map_y,
      0,0,
      c_map_side,c_map_side)
@@ -962,6 +963,7 @@ function draw_title_screen()
   46,10,3)
  draw_title_snakes()
  draw_help()
+ draw_credits()
  draw_hiscore()
  print(
   "press button to start!",
@@ -1021,6 +1023,15 @@ function draw_help()
   spr(c_apple_spr,sid+40,top+54)
 --should stay around pixel
 --4 to 59
+end
+
+function draw_credits()
+ x=4
+ y=100
+ print("game by hattes",
+       x,y,6) --grey
+ print("sound by sfabian",
+       x,y+8,6)
 end
 
 function draw_hiscore()
