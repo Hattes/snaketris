@@ -327,8 +327,10 @@ function retard()
  --give some extra time before
  --snake moves down after the
  --player presses a side button
- mod=max(level*speed,0)
- live_snake.distance-=mod
+ mod=level*speed
+ live_snake.distance=
+   max(live_snake.distance-mod,
+       0)
 end
 
 function move_snake_left()
