@@ -87,6 +87,7 @@ function update_lose()
   --wait some time before auto
   --continuing
   if score_is_high() then
+   music(c_win_music)
    state=c_score_state
   else
    _init()
@@ -310,11 +311,13 @@ end
 
 function control_snake()
  if btnp(0,0) then
-  move_snake_left()
-  retard()
+  if move_snake_left() then
+	  retard()
+	 end
  elseif btnp(1,0) then
-  move_snake_right()
-  retard()
+  if move_snake_right() then
+		 retard()
+		end
  elseif btn(3,0) then
   score+=0.1
   speed_mult=c_down_speed_mult
@@ -337,7 +340,7 @@ function move_snake_left()
  if head.bx==3 or
     snake_coll(head.bx-1,
                head.by) then
-  return
+  return false
  end
  if not hadapple then
   del(live_snake.blocks,
@@ -347,6 +350,7 @@ function move_snake_left()
  end
  add(live_snake.blocks,
      {bx=head.bx-1,by=head.by})
+ return true
 end
 
 function move_snake_right()
@@ -355,7 +359,7 @@ function move_snake_right()
  if head.bx==12 or
     snake_coll(head.bx+1,
                head.by) then
-  return
+  return false
  end
  if not hadapple then
   del(live_snake.blocks,
@@ -365,7 +369,7 @@ function move_snake_right()
  end
  add(live_snake.blocks,
      {bx=head.bx+1,by=head.by})
-
+ return true
 end
 
 -->8
