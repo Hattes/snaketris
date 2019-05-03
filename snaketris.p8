@@ -257,7 +257,6 @@ end
 function kill_snake()
  live_snake.alive=false
  add(dead_snakes,live_snake)
- sfx(c_kill_snake)
  live_snake=nil
  check_lines()
 end
@@ -297,8 +296,9 @@ end
 
 function get_snake_color()
  ncols=#c_snake_cols
- snake_color=(snake_color+1)%
-      ncols+1
+ snake_color+=1
+ snake_color=(snake_color%ncols)
+     +1
  return c_snake_cols[snake_color]
 end
 
@@ -507,9 +507,9 @@ c_snake_base={3,11}
 c_snake_green={11,3}
 c_snake_blue={12,1}
 c_snake_red={8,2}
-c_snake_cols={c_snake_blue,
-              c_snake_red,
-              c_snake_green}
+c_snake_cols={c_snake_red,
+              c_snake_green,
+              c_snake_blue}
             
 c_snake_spawnx=7
 c_snake_spawny=0
@@ -559,7 +559,7 @@ c_no_scores_stored=15
 c_score_base=40
 c_score_inc=10
 c_lines_per_lvl=5
-c_start_lvl=3
+c_start_lvl=1
 
 
 --game state enums
@@ -570,13 +570,13 @@ c_score_state=3
 
 --level colors
 c_lvl_clrs={
- {12,1},
  {8,2},
  {14,2},
  {7,6},
  {9,1},
  {15,13},
  {3,2},
+ {12,1},
  {2,4}
 } 
 
@@ -715,8 +715,7 @@ function draw_game()
 end
 
 function draw_map()
- index=level%#c_lvl_clrs
- index=4
+ index=(level%#c_lvl_clrs)+1
  pal(c_lvl_clrs[1][1],
      c_lvl_clrs[index][1])
  pal(c_lvl_clrs[1][2],
