@@ -259,6 +259,9 @@ function kill_snake()
  add(dead_snakes,live_snake)
  live_snake=nil
  check_lines()
+ for apple in all(apples) do
+  shift_upwards()
+ end
 end
 
 
@@ -917,12 +920,13 @@ function shift_snakes(lines_del)
   end
   for block in all(blocks_del)
   do
-	  del(snake.blocks,block)
-	 end
-	 if #snake.blocks==0 then
-	  add(snakes_del,snake)
-	 end
+   del(snake.blocks,block)
+  end
+  if #snake.blocks==0 then
+   add(snakes_del,snake)
+  end
  end
+
  for snake_d in all(snakes_del)
  do
   del(dead_snakes,snake_d)
@@ -930,21 +934,56 @@ function shift_snakes(lines_del)
  for line_ in all(lines_to_delete)
  do
   blocks_to_shift={}
-		for snake in all(dead_snakes)
-		do
-		 for block in all(snake.blocks)
-		 do
-		  if block.by<=line_ then
-		   add(blocks_to_shift,block)
-		  end
-		 end
-		end
-		for block in
-		 all(blocks_to_shift)
-		do
-		 block.by+=1
-		end
-	end
+  for snake in all(dead_snakes)
+  do
+   for block in all(snake.blocks)
+   do
+    if block.by<=line_ then
+     add(blocks_to_shift,block)
+    end
+   end
+  end
+  for block in
+   all(blocks_to_shift)
+  do
+   block.by+=1
+  end
+ end
+end
+
+function shift_upwards()
+ for snake in all(dead_snakes) do
+  for block in all(snake.blocks) do
+    block.by -= 1
+  end
+ end
+
+ local _col = get_snake_color()
+ local level_width = 10
+
+ local hole_1 = flr(rnd(level_width))
+ local hole_2 = flr(rnd(level_width))
+ while hole_1 == hole_2 do
+  hole_2 = flr(rnd(level_width))
+ end
+
+ local blocks = {}
+ for n=0, level_width-1 do
+  if n ~= hole_1 and n ~= hole_2 then
+   local block = {
+    bx=n + 3,
+    by=15,
+    sprite=c_snake_body_hor,
+   }
+   add(blocks, block)
+  end
+ end
+ local new_snake = {
+  blocks=blocks,
+  col=_col,
+  alive=false,
+ }
+ add(dead_snakes, new_snake)
 end
 
 function draw_delete_lines()
