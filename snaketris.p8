@@ -5,8 +5,7 @@ function lvl_x()
  return lvl_map*c_map_side
 end
 
-function 
-has_flag(celx,cely,spr_flag)
+function has_flag(celx,cely,spr_flag)
  sprite=
   mget(celx,
        cely+c_copy_map_y)
@@ -33,6 +32,8 @@ function _init()
  lines_to_delete={}
  delete_countdown=0
  apples_to_spawn=2
+ should_add_trash = false
+ trash_counter = 0
  if hiscores==nil then
   hiscores={}
   for n=1,c_no_scores_stored do
@@ -138,30 +139,33 @@ end
 --- end new level ---
 
 function update_game()
- if delete_countdown>0 then
-  update_delete_lines()
-  return
- end
- if next_snake == nil then
-  pregen_snake()
- end
- if live_snake == nil or
-    not live_snake.alive then
-  spawn_snake(next_snake)
-  if state==c_lose_state then
-   return
-  end
-  spawn_apples()
- end
- advance_snake()
- check_apple()
- if live_snake==nil or
-    not live_snake.alive then
-  return
- end
- control_snake()
- check_apple()
- update_level()
+    if delete_countdown>0 then
+        update_delete_lines()
+        return
+    end
+    if next_snake == nil then
+        pregen_snake()
+    end
+    if should_add_trash then
+        add_trash_lines()
+        should_add_trash = false
+    end
+    if live_snake == nil or not live_snake.alive then
+        spawn_snake(next_snake)
+        if state==c_lose_state then
+            return
+        end
+        spawn_apples()
+    end
+    advance_snake()
+    check_apple()
+    if live_snake==nil or not live_snake.alive then
+        return
+    end
+    control_snake()
+    check_apple()
+    update_level()
+
 end
 
 function update_level()
@@ -255,13 +259,12 @@ function advance_snake()
 end
 
 function kill_snake()
- live_snake.alive=false
- add(dead_snakes,live_snake)
- live_snake=nil
- check_lines()
- for apple in all(apples) do
-  shift_upwards()
- end
+    live_snake.alive=false
+    add(dead_snakes,live_snake)
+    live_snake=nil
+    check_lines()
+    trash_counter = #apples
+    should_add_trash = #lines_to_delete == 0
 end
 
 
@@ -303,10 +306,6 @@ function get_snake_color()
  snake_color=(snake_color%ncols)
      +1
  return c_snake_cols[snake_color]
-end
-
-function update_snake()
- control_snake()
 end
 
 function control_snake()
@@ -449,41 +448,6 @@ function die()
  player=0
 end
 
-function 
-enemy_collision(actor,enemy)
- if jump_collision(actor,enemy)
- and enemy.enemy_type~=c_shot
- then
-  kill(enemy)
-  sfx(c_kill_sfx)
-  bounce(actor)
- elseif death_collision(
-         actor,enemy) then
-  return true
- end
- return false
-end
-
-function kill(enemy)
- del(enemies,enemy)
- create_particles(
-  enemy.x,enemy.y)
- if enemy.enemy_type==c_boss
- then
-  for i=1,6 do
-   create_particles(
-    enemy.x,enemy.y)
-  end
-  boss_dead()
- end
-end
-
-function boss_dead()
- music(-1,200)
- boss_dead_count=220
- state=c_boss_dead_state
-end
-
 -->8
 --constants
 
@@ -607,8 +571,6 @@ c_pl1_no=0
 c_menu_music=00
 c_lvl1_music=22
 c_lose_music=07
-c_boss_music=12
-c_boss_dead_music=10
 c_win_music=04
 
 --sound effects
@@ -897,11 +859,13 @@ function check_lines()
 end
 
 function update_delete_lines()
- delete_countdown-=1
- if delete_countdown<=0 and
-    #lines_to_delete>0 then
-  shift_snakes(lines_to_delete)
- end
+    delete_countdown-=1
+    if delete_countdown<=0 then
+        if #lines_to_delete>0 then
+            shift_snakes(lines_to_delete)
+        end
+        should_add_trash = true
+    end
 end
 
 function shift_snakes(lines_del)
@@ -943,47 +907,52 @@ function shift_snakes(lines_del)
     end
    end
   end
-  for block in
-   all(blocks_to_shift)
+  for block in all(blocks_to_shift)
   do
    block.by+=1
   end
  end
 end
 
-function shift_upwards()
- for snake in all(dead_snakes) do
-  for block in all(snake.blocks) do
-    block.by -= 1
-  end
- end
+function add_trash_line()
+    for snake in all(dead_snakes) do
+        for block in all(snake.blocks) do
+            block.by -= 1
+        end
+    end
 
- local _col = get_snake_color()
- local level_width = 10
+    local _col = get_snake_color()
+    local level_width = 10
 
- local hole_1 = flr(rnd(level_width))
- local hole_2 = flr(rnd(level_width))
- while hole_1 == hole_2 do
-  hole_2 = flr(rnd(level_width))
- end
+    local hole_1 = flr(rnd(level_width))
+    local hole_2 = flr(rnd(level_width))
+    while hole_1 == hole_2 do
+        hole_2 = flr(rnd(level_width))
+    end
 
- local blocks = {}
- for n=0, level_width-1 do
-  if n ~= hole_1 and n ~= hole_2 then
-   local block = {
-    bx=n + 3,
-    by=15,
-    sprite=c_snake_body_hor,
-   }
-   add(blocks, block)
-  end
- end
- local new_snake = {
-  blocks=blocks,
-  col=_col,
-  alive=false,
- }
- add(dead_snakes, new_snake)
+    local blocks = {}
+    for n=0, level_width-1 do
+        if n ~= hole_1 and n ~= hole_2 then
+            local block = {
+                bx=n + 3,
+                by=15,
+                sprite=c_snake_body_hor,
+            }
+            add(blocks, block)
+        end
+    end
+    local new_snake = {
+        blocks=blocks,
+        col=_col,
+        alive=false,
+    }
+    add(dead_snakes, new_snake)
+end
+
+function add_trash_lines()
+    for n=0, trash_counter-1 do
+        add_trash_line()
+    end
 end
 
 function draw_delete_lines()
